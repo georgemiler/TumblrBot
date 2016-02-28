@@ -1,6 +1,6 @@
 <?php
 /**
- * Tumblr API
+ * Tumblr
 
  */
 ini_set('display_errors', 1);
@@ -18,13 +18,13 @@ $client = new Tumblr\API\Client(
   'tdgnL84cy51XkHLMDZsYOUCJIxqKhslQiURDoxnjyWnLIK8uEm',
   '6lppQK9CLPSBBw3Qtzeoq4VQX4U1WdmdeCljcy9BqrD6IQcG8Q'
 );
+$posts = $client->getBlogPosts('squirescreen.tumblr.com', array('limit' => 20, 'offset' => 5));
 
-// Make the request
-$posts = $client->getTaggedPosts('youtube', array('limit' => 17));
-
-foreach ($posts as $key => $post) {
-    $client->like($post->id, $post->reblog_key);
-};
+foreach ($post as $key => $post){
+    if ($post->note_count == 0 && strpos($post->summary, "Turks") > -1 ){
+        $client->deletePost('squirescreen.tumblr.com', $post->id);
+    }
+}
 echo 'success';
 
 ?>

@@ -6,6 +6,7 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+include 'pullVideoTrendingKeywords.php';
 
 include "tumblr.php-master/vendor/autoload.php";
 include "tumblr.php-master/lib/Tumblr/API/Client.php";
@@ -19,12 +20,13 @@ $client = new Tumblr\API\Client(
   '6lppQK9CLPSBBw3Qtzeoq4VQX4U1WdmdeCljcy9BqrD6IQcG8Q'
 );
 
-// Make the request
-$posts = $client->getTaggedPosts('youtube', array('limit' => 17));
+foreach ($keywords as $key => $keyword){
+    $posts = $client->getTaggedPosts($keyword, array('limit' => 6));
 
-foreach ($posts as $key => $post) {
-    $client->like($post->id, $post->reblog_key);
+    foreach ($posts as $key => $post) {
+        $client->like($post->id, $post->reblog_key);
+        $client->follow($post->blog_name);
+    };
 };
-echo 'success';
 
 ?>

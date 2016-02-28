@@ -1,6 +1,6 @@
 <?php
 /**
- * Tumblr API
+ * Tumblr
 
  */
 ini_set('display_errors', 1);
@@ -19,12 +19,6 @@ $client = new Tumblr\API\Client(
   '6lppQK9CLPSBBw3Qtzeoq4VQX4U1WdmdeCljcy9BqrD6IQcG8Q'
 );
 
-// Make the request
-$posts = $client->getTaggedPosts('youtube', array('limit' => 17));
 
-foreach ($posts as $key => $post) {
-    $client->like($post->id, $post->reblog_key);
-};
-echo 'success';
 
 ?>
