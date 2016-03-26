@@ -12,30 +12,44 @@ include "tumblr.php-master/lib/Tumblr/API/Client.php";
 include "tumblr.php-master/lib/Tumblr/API/RequestException.php";
 include "tumblr.php-master/lib/Tumblr/API/RequestHandler.php";
 
-$client = new Tumblr\API\Client(
-  'MCC0eoLjJxKx211XKLwT2c9HXkeTkL5QmaKpotO34vTahXz1Ov',
-  '4blwheWahpg5oQJTOeR3oG6MDHk13Vi9AhmKjv1YbTyHtA98JV',
-  'tdgnL84cy51XkHLMDZsYOUCJIxqKhslQiURDoxnjyWnLIK8uEm',
-  '6lppQK9CLPSBBw3Qtzeoq4VQX4U1WdmdeCljcy9BqrD6IQcG8Q'
-);
+// $client = new Tumblr\API\Client(
+//   'MCC0eoLjJxKx211XKLwT2c9HXkeTkL5QmaKpotO34vTahXz1Ov',
+//   '4blwheWahpg5oQJTOeR3oG6MDHk13Vi9AhmKjv1YbTyHtA98JV',
+//   'tdgnL84cy51XkHLMDZsYOUCJIxqKhslQiURDoxnjyWnLIK8uEm',
+//   '6lppQK9CLPSBBw3Qtzeoq4VQX4U1WdmdeCljcy9BqrD6IQcG8Q'
+// );
 $i=0;
-$followed = $client->getFollowedBlogs();
-$followers = $client->getBlogFollowers('squirescreen.tumblr.com');
-increaseListAmount();
+increaseListAmount(0);
 
-function increaseListAmount (){
-  $i++;
+function increaseListAmount ($i){
+  $client = new Tumblr\API\Client(
+    'MCC0eoLjJxKx211XKLwT2c9HXkeTkL5QmaKpotO34vTahXz1Ov',
+    '4blwheWahpg5oQJTOeR3oG6MDHk13Vi9AhmKjv1YbTyHtA98JV',
+    'tdgnL84cy51XkHLMDZsYOUCJIxqKhslQiURDoxnjyWnLIK8uEm',
+    '6lppQK9CLPSBBw3Qtzeoq4VQX4U1WdmdeCljcy9BqrD6IQcG8Q'
+  );
+  $followed = $client->getFollowedBlogs();
+  $followers = $client->getBlogFollowers('squirescreen.tumblr.com');
+
   $followedTemp = $client->getFollowedBlogs(array('offset' => 20*$i));
-  $followed = ($followedTemp !==null) ? $followed + $followedTemp: $followed;
+  if($followedTemp !==null){
+    array_merge($followed->blogs,$followedTemp->blogs);
+  };
   $followersTemp = $client->getBlogFollowers('squirescreen.tumblr.com', array('offset' => 20*$i));
-  $followers = ($followersTemp !==null) ? $followers + $followersTemp: $followers;
+  if ($followersTemp !==null){
+    array_merge($followers->users, $followersTemp->users);
+  };
   if ($followedTemp == null){
     checkForMatches();
-  };
+  } else {
+    $i++;
+    increaseListAmount($i);
+  }
+  print_r($followed);
 };
 
 function checkForMatches (){
-  foreach ($followed->blogs as $key => $following) {
+  foreach ($followed as $key => $following) {
       // Make the request
 
       $checkFollowedName = $following->name;
@@ -43,7 +57,7 @@ function checkForMatches (){
 
       $match=null;
 
-      foreach ($followers->users as $key => $follower) {
+      foreach ($followers as $key => $follower) {
           if ($checkFollowedName == $follower->name) {
               $match=1;
           }
@@ -59,8 +73,6 @@ function checkForMatches (){
   updateList($i);
 };
 
-
-echo ' success ';
 //$data = $client->getBlogFollowers('squirescreen.tumblr.com');
 
 ?>

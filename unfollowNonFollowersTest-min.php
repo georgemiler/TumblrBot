@@ -18,24 +18,39 @@ $client = new Tumblr\API\Client(
   'tdgnL84cy51XkHLMDZsYOUCJIxqKhslQiURDoxnjyWnLIK8uEm',
   '6lppQK9CLPSBBw3Qtzeoq4VQX4U1WdmdeCljcy9BqrD6IQcG8Q'
 );
+  $followed = $client->getFollowedBlogs();
+  file_put_contents("followed.json",json_encode($followed));
+  $followers = $client->getBlogFollowers('squirescreen.tumblr.com');
+  file_put_contents("followers.json",json_encode($followers));
 $i=0;
-$followed = $client->getFollowedBlogs();
-$followers = $client->getBlogFollowers('squirescreen.tumblr.com');
-increaseListAmount();
+increaseListAmount($i,$followed->blogs,$followers->users,$client);
 
-function increaseListAmount (){
-  $i++;
+function increaseListAmount ($i,$blogs,$users,$client){
+
   $followedTemp = $client->getFollowedBlogs(array('offset' => 20*$i));
-  $followed = ($followedTemp !==null) ? $followed + $followedTemp: $followed;
-  $followersTemp = $client->getBlogFollowers('squirescreen.tumblr.com', array('offset' => 20*$i));
-  $followers = ($followersTemp !==null) ? $followers + $followersTemp: $followers;
-  if ($followedTemp == null){
-    checkForMatches();
+  if($followedTemp !==null){
+    array_merge($blogs,$followedTemp->blogs);
+      file_put_contents("followed".$i.".json",json_encode($blogs));
   };
+  $followersTemp = $client->getBlogFollowers('squirescreen.tumblr.com', array('offset' => 20*$i));
+  if ($followersTemp !==null){
+    array_merge($users, $followersTemp->users);
+    file_put_contents("followers".$i.".json",json_encode($users));
+  };
+  if ($followedTemp == null){
+    //checkForMatches();
+    echo 'hello';
+  } else {
+    $i++;
+    increaseListAmount($i,$blogs,$users,$client);
+  }
+  print_r($blogs);
+  echo '          ';
+  print_r($users);
 };
 
 function checkForMatches (){
-  foreach ($followed->blogs as $key => $following) {
+  foreach ($followed as $key => $following) {
       // Make the request
 
       $checkFollowedName = $following->name;
@@ -43,7 +58,7 @@ function checkForMatches (){
 
       $match=null;
 
-      foreach ($followers->users as $key => $follower) {
+      foreach ($followers as $key => $follower) {
           if ($checkFollowedName == $follower->name) {
               $match=1;
           }
@@ -59,8 +74,6 @@ function checkForMatches (){
   updateList($i);
 };
 
-
-echo ' success ';
 //$data = $client->getBlogFollowers('squirescreen.tumblr.com');
 
 ?>
